@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JTable;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.SpringLayout;
@@ -68,8 +69,8 @@ public class StockGui implements Observer{
 
 		Stock stock = new Stock();
 		for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
-			String[] drinks = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), newStockTextField.getText()};
-			model.addRow(drinks);
+			String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), newStockTextField.getText()};
+			model.addRow(drinkForTable);
 		}
 		drinksTable = new JTable(model);
 		
@@ -79,9 +80,21 @@ public class StockGui implements Observer{
 			public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					try {
-						//set stock from drink with same attribute-values as values in tablerow to value of textfield
-						
-						
+						//get value of new entry in stock column and corresponding id
+						int newStockValue = Integer.parseInt(newStockTextField.getText());
+						if(newStockValue >= 0) {
+							int idOfChangedDrink = drinksTable.getSelectedRow();
+							//uses setNewStockInFile from Stock.java
+							Stock stock = new Stock();
+							stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", idOfChangedDrink, newStockValue);
+						}
+						else {
+							//opens dialog with message
+							JOptionPane.showMessageDialog(frame,
+								    "Neue Menge kann nicht negativ sein",
+								    "Inane warning",
+								    JOptionPane.WARNING_MESSAGE);
+						}
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -127,10 +140,11 @@ public class StockGui implements Observer{
 		frame.getContentPane().add(btnCloseApp);
 		
 		JButton btnAddDrink = new JButton("Neues Getränk hinzufügen");
-		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 246, SpringLayout.EAST, labelSum);
-		springLayout.putConstraint(SpringLayout.NORTH, labelSum, 4, SpringLayout.NORTH, btnAddDrink);
+		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 209, SpringLayout.EAST, labelSum);
 		btnAddDrink.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				AddNewDrinkDialog addDrinkDialog = new AddNewDrinkDialog();
+				addDrinkDialog.setVisible(true);
 			}
 		});
 		frame.getContentPane().add(btnAddDrink);
@@ -147,6 +161,7 @@ public class StockGui implements Observer{
 		frame.getContentPane().add(date);
 		
 		JScrollPane scrollPane = new JScrollPane(drinksTable);
+		springLayout.putConstraint(SpringLayout.NORTH, labelSum, 6, SpringLayout.SOUTH, scrollPane);
 		springLayout.putConstraint(SpringLayout.SOUTH, scrollPane, -134, SpringLayout.SOUTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.NORTH, btnRemoveDrink, 2, SpringLayout.SOUTH, scrollPane);
 		springLayout.putConstraint(SpringLayout.NORTH, btnAddDrink, 2, SpringLayout.SOUTH, scrollPane);

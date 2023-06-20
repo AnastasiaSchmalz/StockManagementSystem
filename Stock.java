@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Scanner;
@@ -45,7 +47,7 @@ public class Stock extends Observable{
 		double priceAttribute = 0;
 		int stockAttribute = 0;
 		
-		//to convert each line from csv-data into its own array
+		//array for converting each line from csv-data into its own array
 		String[] drinksPerLine = new String[1];
 		
 		File fileToRead = new File(file);
@@ -75,7 +77,7 @@ public class Stock extends Observable{
 						stockAttribute = Integer.parseInt(drinkAttributeArray[j]);
 					}
 					else {
-						throw new Exception("There was an error while converting data into attributes for drinks");
+						throw new Exception("Error while converting data into attributes for drinks");
 					}
 				}
 				drinkToAdd = new Drink(idAttribute, nameAttribute, priceAttribute, stockAttribute);
@@ -83,6 +85,19 @@ public class Stock extends Observable{
 				System.out.println(drinkToAdd.getPrice());
 				System.out.println(drinkToAdd.getStock()); */
 				drinksList.add(drinkToAdd);
+				
+				//comparing and sorting by stock and by name
+				class DrinkComparator implements Comparator<Drink> {
+					@Override
+					public int compare(Drink drinkOne, Drink drinkTwo) {
+						int compareValue = Integer.compare(drinkOne.getStock(), drinkTwo.getStock());
+						if(compareValue == 0) {
+							compareValue = drinkOne.getName().compareTo(drinkTwo.getName());
+						}
+						return compareValue;
+					}
+				}
+				Collections.sort(drinksList, new DrinkComparator());
 				}
 			} scanner.close();
 		} catch (FileNotFoundException e) {
@@ -173,7 +188,8 @@ public class Stock extends Observable{
 		Drink[] drinks ={drinkOne, drinkTwo};*/
 		Stock stock = new Stock(); 
 		
-		stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", 3, 1000);
+		stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", 1, 521);
+		stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\");
 		System.out.println(stock.getDrinks());
 		
 //		stock.testTransformListToStrings();
