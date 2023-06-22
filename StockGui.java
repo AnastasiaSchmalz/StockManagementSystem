@@ -1,15 +1,8 @@
 package stockmanagementsystem;
 
+import java.awt.Component;
 import java.awt.EventQueue;
-import javax.swing.JFrame;
-import javax.swing.JTable;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.SpringLayout;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.JScrollPane;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -18,7 +11,25 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Observable;
 import java.util.Observer;
-import java.awt.event.ActionEvent;
+
+import javax.swing.AbstractButton;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SpringLayout;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableColumn;
 
 public class StockGui implements Observer{
 
@@ -63,60 +74,15 @@ public class StockGui implements Observer{
 		DefaultTableModel model = new DefaultTableModel(columnHeaders, 0);
 		
 		
-		//Adding textfield and drinks to table
-		JTextField newStockTextField = new JTextField();
-		newStockTextField.setText("Neue Menge eintragen");
-
+		//Adding drinks to table
 		Stock stock = new Stock();
 		for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
-			String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), newStockTextField.getText()};
+			String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), " "};
 			model.addRow(drinkForTable);
 		}
-		drinksTable = new JTable(model);
-		
-		//change stock of corresponding drink on enter
-		newStockTextField.addKeyListener(new KeyListener() {
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					try {
-						//get value of new entry in stock column and corresponding id
-						int newStockValue = Integer.parseInt(newStockTextField.getText());
-						if(newStockValue >= 0) {
-							int idOfChangedDrink = drinksTable.getSelectedRow();
-							//uses setNewStockInFile from Stock.java
-							Stock stock = new Stock();
-							stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", idOfChangedDrink, newStockValue);
-						}
-						else {
-							//opens dialog with message
-							JOptionPane.showMessageDialog(frame,
-								    "Neue Menge kann nicht negativ sein",
-								    "Inane warning",
-								    JOptionPane.WARNING_MESSAGE);
-						}
-					} catch (Exception e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				}
-			}
-
-			@Override
-			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
-			}			
-		});
+		drinksTable = new JTable(model);		
 		
 		JLabel labelSum = new JLabel("Gesamtsumme:");
-
 		
 		SpringLayout springLayout = new SpringLayout();
 		springLayout.putConstraint(SpringLayout.NORTH, drinksTable, 0, SpringLayout.NORTH, frame.getContentPane());
@@ -175,6 +141,61 @@ public class StockGui implements Observer{
 		springLayout.putConstraint(SpringLayout.NORTH, lblNewLabel_3, 0, SpringLayout.NORTH, labelSum);
 		springLayout.putConstraint(SpringLayout.WEST, lblNewLabel_3, 6, SpringLayout.EAST, labelSum);
 		frame.getContentPane().add(lblNewLabel_3);
+		
+		//change stock of corresponding drink on enter
+		drinksTable.addKeyListener (new KeyListener() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if(e.getKeyChar() == KeyEvent.VK_ENTER) {
+				//get value of new entry in stock column and corresponding id
+				int idOfChangedDrink = drinksTable.getSelectedRow();
+				TableCellEditor cellEditor = drinksTable.getCellEditor(idOfChangedDrink,3);	
+				cellEditor.stopCellEditing();
+				Object cellValue = cellEditor.getCellEditorValue();
+			    String textFieldString = (String) cellValue;
+			    //remove whitespace
+			    textFieldString = textFieldString.replaceAll("\\s", "");
+			        
+				if(!textFieldString.equals("")) {
+					int newStockValue = Integer.parseInt(textFieldString);
+					if(newStockValue >= 0) {
+						//uses setNewStockInFile from Stock.java
+						try {
+							stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", idOfChangedDrink, newStockValue);
+						} catch (Exception e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+							}
+					}
+					else {
+						//opens dialog with message
+						JOptionPane.showMessageDialog(frame,
+							    "Neue Menge kann nicht negativ sein",
+							    "Inane warning",
+							    JOptionPane.WARNING_MESSAGE);
+					}
+				}
+
+				else {
+					JOptionPane.showMessageDialog(frame,
+						    "Neue Menge kann nicht leer sein",
+						    "Inane warning",
+						    JOptionPane.WARNING_MESSAGE);
+				}
+			}
+		}
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				// TODO Auto-generated method stub
+				
+			}});
 	}
 
 	@Override
