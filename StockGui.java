@@ -1,6 +1,5 @@
 package stockmanagementsystem;
 
-import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,24 +11,16 @@ import java.time.format.FormatStyle;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.AbstractButton;
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SpringLayout;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableColumn;
 
 public class StockGui implements Observer{
 
@@ -94,6 +85,9 @@ public class StockGui implements Observer{
 		frame.getContentPane().add(drinksTable);
 		frame.getContentPane().add(labelSum);
 		frame.getContentPane().add(labelTable);
+		
+		JPanel tableContainer = new JPanel(springLayout);
+		frame.add(tableContainer);
 		
 		JButton btnCloseApp = new JButton("Anwendung schließen");
 		springLayout.putConstraint(SpringLayout.SOUTH, btnCloseApp, -10, SpringLayout.SOUTH, frame.getContentPane());
@@ -162,10 +156,19 @@ public class StockGui implements Observer{
 						//uses setNewStockInFile from Stock.java
 						try {
 							stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", idOfChangedDrink, newStockValue);
+							
+							model.setRowCount(0);
+							for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
+								String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), " "};
+								model.addRow(drinkForTable);
+							}
+							drinksTable.repaint();
+							
 						} catch (Exception e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 							}
+
 					}
 					else {
 						//opens dialog with message
