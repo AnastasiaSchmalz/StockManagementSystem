@@ -8,9 +8,6 @@ import java.awt.event.KeyListener;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Observable;
-import java.util.Observer;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -21,11 +18,13 @@ import javax.swing.JTable;
 import javax.swing.SpringLayout;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.SwingConstants;
 
-public class StockGui implements Observer{
+public class StockGui {
 
-	private JFrame frame;
-	private JTable drinksTable;
+	JFrame frame;
+	JTable drinksTable;
+	JLabel totalStockLabel;
 	/**
 	 * Launch the application.
 	 */
@@ -40,6 +39,13 @@ public class StockGui implements Observer{
 				}
 			}
 		});
+		CheckDoneFile checkDoneFile = new CheckDoneFile();
+		checkDoneFile.start();
+		try {
+			checkDoneFile.join();
+		} catch (InterruptedException e) {
+			
+		}
 	}
 
 	/**
@@ -87,31 +93,44 @@ public class StockGui implements Observer{
 		frame.getContentPane().add(labelTable);
 		
 		JPanel tableContainer = new JPanel(springLayout);
-		frame.add(tableContainer);
+		frame.getContentPane().add(tableContainer);
 		
 		JButton btnCloseApp = new JButton("Anwendung schließen");
 		springLayout.putConstraint(SpringLayout.SOUTH, btnCloseApp, -10, SpringLayout.SOUTH, frame.getContentPane());
 		btnCloseApp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				frame.dispose();
+				int option = JOptionPane.showConfirmDialog(frame, "Anwendung schließen?", "Anwendung schließen?", JOptionPane.OK_CANCEL_OPTION);
+				if(option == JOptionPane.OK_OPTION) {
+					frame.dispose();
+				}
 			}
 		});
 		springLayout.putConstraint(SpringLayout.EAST, btnCloseApp, -10, SpringLayout.EAST, frame.getContentPane());
 		frame.getContentPane().add(btnCloseApp);
 		
 		JButton btnAddDrink = new JButton("Neues Getränk hinzufügen");
-		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 209, SpringLayout.EAST, labelSum);
+		btnAddDrink.setToolTipText("Neues Getränk hinzufügen");
+		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 560, SpringLayout.EAST, tableContainer);
+		springLayout.putConstraint(SpringLayout.EAST, btnAddDrink, 760, SpringLayout.EAST, tableContainer);
+		btnAddDrink.setHorizontalAlignment(SwingConstants.RIGHT);
 		btnAddDrink.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AddNewDrinkDialog addDrinkDialog = new AddNewDrinkDialog();
 				addDrinkDialog.setVisible(true);
+				model.setRowCount(0);
+				try {
+					for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
+						String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), " "};
+						model.addRow(drinkForTable);
+					}
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				drinksTable.repaint();
 			}
 		});
 		frame.getContentPane().add(btnAddDrink);
-		
-		JButton btnRemoveDrink = new JButton("Getränk entfernen");
-		springLayout.putConstraint(SpringLayout.EAST, btnAddDrink, -6, SpringLayout.WEST, btnRemoveDrink);
-		frame.getContentPane().add(btnRemoveDrink);
 		
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
 		JLabel date = new JLabel(String.valueOf((LocalDate.now()).format(formatter)));
@@ -123,18 +142,17 @@ public class StockGui implements Observer{
 		JScrollPane scrollPane = new JScrollPane(drinksTable);
 		springLayout.putConstraint(SpringLayout.NORTH, labelSum, 6, SpringLayout.SOUTH, scrollPane);
 		springLayout.putConstraint(SpringLayout.SOUTH, scrollPane, -134, SpringLayout.SOUTH, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.NORTH, btnRemoveDrink, 2, SpringLayout.SOUTH, scrollPane);
 		springLayout.putConstraint(SpringLayout.NORTH, btnAddDrink, 2, SpringLayout.SOUTH, scrollPane);
 		springLayout.putConstraint(SpringLayout.WEST, labelSum, 0, SpringLayout.WEST, scrollPane);
 		springLayout.putConstraint(SpringLayout.WEST, scrollPane, 170, SpringLayout.WEST, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, scrollPane, -172, SpringLayout.EAST, frame.getContentPane());
-		springLayout.putConstraint(SpringLayout.EAST, btnRemoveDrink, 0, SpringLayout.EAST, scrollPane);
 		frame.getContentPane().add(scrollPane);
 		
-		JLabel lblNewLabel_3 = new JLabel("...");
-		springLayout.putConstraint(SpringLayout.NORTH, lblNewLabel_3, 0, SpringLayout.NORTH, labelSum);
-		springLayout.putConstraint(SpringLayout.WEST, lblNewLabel_3, 6, SpringLayout.EAST, labelSum);
-		frame.getContentPane().add(lblNewLabel_3);
+		totalStockLabel = new JLabel();
+		springLayout.putConstraint(SpringLayout.NORTH, totalStockLabel, 0, SpringLayout.NORTH, labelSum);
+		springLayout.putConstraint(SpringLayout.WEST, totalStockLabel, 6, SpringLayout.EAST, labelSum);
+		frame.getContentPane().add(totalStockLabel);
+		totalStockLabel.setText(String.valueOf(stock.getTotalStock("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")));
 		
 		//change stock of corresponding drink on enter
 		drinksTable.addKeyListener (new KeyListener() {
@@ -161,6 +179,7 @@ public class StockGui implements Observer{
 							for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
 								String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), " "};
 								model.addRow(drinkForTable);
+								totalStockLabel.setText(String.valueOf(stock.getTotalStock("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")));
 							}
 							drinksTable.repaint();
 							
@@ -174,7 +193,7 @@ public class StockGui implements Observer{
 						//opens dialog with message
 						JOptionPane.showMessageDialog(frame,
 							    "Neue Menge kann nicht negativ sein",
-							    "Inane warning",
+							    "Warnung",
 							    JOptionPane.WARNING_MESSAGE);
 					}
 				}
@@ -182,7 +201,7 @@ public class StockGui implements Observer{
 				else {
 					JOptionPane.showMessageDialog(frame,
 						    "Neue Menge kann nicht leer sein",
-						    "Inane warning",
+						    "Warnung",
 						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
@@ -199,11 +218,5 @@ public class StockGui implements Observer{
 				// TODO Auto-generated method stub
 				
 			}});
-	}
-
-	@Override
-	public void update(Observable o, Object arg) {
-		// TODO Auto-generated method stub
-		
 	}
 }

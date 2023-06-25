@@ -3,16 +3,19 @@ package stockmanagementsystem;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Stream;
 
-public class Stock extends Observable{
+public class Stock{
 	
-	static ArrayList<Drink> drinks;
+	ArrayList<Drink> drinks;
 	int totalStock;
 	double totalPrice;
 	
@@ -32,13 +35,14 @@ public class Stock extends Observable{
 		return drinks;
 	}
 	
-/*	public int getTotalStock() {
+	public int getTotalStock(String file) throws Exception {
+		List<Drink> drinks = this.readStockData(file);
+		totalStock = drinks.stream()
+				.mapToInt(drink -> drink.getStock())
+				.sum();
 		return totalStock;
 	}
-	
-	public double totalPrice() {
-		return totalPrice;
-	} */
+
 	
 	public ArrayList<Drink> readStockData(String file) throws Exception {
 		ArrayList<Drink> drinksList = new ArrayList<>();
@@ -47,43 +51,32 @@ public class Stock extends Observable{
 		double priceAttribute = 0;
 		int stockAttribute = 0;
 		
-		//array for converting each line from csv-data into its own array
-		String[] drinksPerLine = new String[1];
-		
 		File fileToRead = new File(file);
 		Scanner scanner;
 		try {
 			scanner = new Scanner(fileToRead);
 			while(scanner.hasNext()) {
-			String drinkToBeSeparated = scanner.nextLine();
-			for(int i = 0; i < 1; i++) {
-				drinksPerLine[i] = drinkToBeSeparated;
-//				String drinkAttribute = Arrays.toString(drinksPerLine);				
-//				System.out.println(drinkAttribute);
+				String drinkToBeSeparated = scanner.nextLine();
 				String[] drinkAttributeArray = drinkToBeSeparated.split(";");
-//				System.out.println(Arrays.toString(drinkAttributeArray));
 				Drink drinkToAdd = null;
-				for (int j = 0; j < 4; j++) {
-					if(j == 0) {
-						idAttribute = Integer.parseInt(drinkAttributeArray[j]);
+				for (int i = 0; i < 4; i++) {
+					if(i == 0) {
+						idAttribute = Integer.parseInt(drinkAttributeArray[i]);
 					}
-					else if(j == 1) {
-						nameAttribute = drinkAttributeArray[j];
+					else if(i == 1) {
+						nameAttribute = drinkAttributeArray[i];
 					}
-					else if(j == 2) {
-						priceAttribute = Double.parseDouble(drinkAttributeArray[j]);
+					else if(i == 2) {
+						priceAttribute = Double.parseDouble(drinkAttributeArray[i]);
 					}
-					else if(j == 3) {
-						stockAttribute = Integer.parseInt(drinkAttributeArray[j]);
+					else if(i == 3) {
+						stockAttribute = Integer.parseInt(drinkAttributeArray[i]);
 					}
 					else {
-						throw new Exception("Error while converting data into attributes for drinks");
+						throw new Exception("Exception while converting data into attributes for drinks");
 					}
 				}
 				drinkToAdd = new Drink(idAttribute, nameAttribute, priceAttribute, stockAttribute);
-/*				System.out.println(drinkToAdd.getName());
-				System.out.println(drinkToAdd.getPrice());
-				System.out.println(drinkToAdd.getStock()); */
 				drinksList.add(drinkToAdd);
 				
 				//comparing and sorting by stock and by name
@@ -98,8 +91,11 @@ public class Stock extends Observable{
 					}
 				}
 				Collections.sort(drinksList, new DrinkComparator());
+				for(Drink drink : drinksList) {
+					drink.setId(drinksList.indexOf(drink));
 				}
-			} scanner.close();
+			}
+		scanner.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -130,69 +126,25 @@ public class Stock extends Observable{
 		}
 		filewriter.close();
 	}
+
 	
-	private void testTransformListToStrings( ) {
-		Drink drinkOne = new Drink(1, "Pepsi", 0.99, 368);
-		Drink drinkTwo = new Drink(2, "Coca Cola", 0.99, 299);
-		Drink drinkThree = new Drink(3, "Fanta", 0.99, 459);
-		Drink drinkFour = new Drink(4, "7Up", 0.99, 342);
-		Drink drinkFive = new Drink(5, "Dr. Pepper", 0.99, 256);
-		Drink drinkSix = new Drink(6, "La Croix", 0.99, 412);
+	protected void bookInDrink(String file, Drink newDrink) throws IOException {
+		File fileWithNewDrink = new File(file);
+		FileWriter filewriter = new FileWriter(fileWithNewDrink, true);
 		
-		ArrayList<Drink> drinksTest = new ArrayList<>();
-		drinksTest.add(drinkOne);
-		drinksTest.add(drinkTwo);
-		drinksTest.add(drinkThree);
-		drinksTest.add(drinkFour);
-		drinksTest.add(drinkFive);
-		drinksTest.add(drinkSix);
+		String idString = String.valueOf(newDrink.getId()).concat(";");
+		String nameString = newDrink.getName().concat(";");
+		String priceString = String.valueOf(newDrink.getPrice()).concat(";");
+		String stockString = String.valueOf(newDrink.getStock());
+		String drinkString = idString+nameString+priceString+stockString;
 		
-		for (Drink drink: drinksTest) {
-			if(drink.getId() == 1) {
-				drink.setStock(700);
-			}
-		}
-		
-		for(Drink drink: drinksTest) {
-			String idString = String.valueOf(drink.getId()).concat(";");
-			String nameString = drink.getName().concat(";");
-			String priceString = String.valueOf(drink.getPrice()).concat(";");
-			String stockString = String.valueOf(drink.getStock());
-			String drinkString = idString+nameString+priceString+stockString;
-			System.out.println(drinkString);
-		}
+		filewriter.write(drinkString);
+		filewriter.write("\n");
+		filewriter.close();
 	}
 	
-	protected void bookInDrink(Drink newDrink) {
-		//not implemented yet
-	}
-	
-	protected void bookOutDrink(Drink drinkToRemove) {
-		//not implemented yet
-	}
-	
-	//Observable Methods
-	@Override
-	public void addObserver(Observer o) {
-		
-	}
-	
-	@Override
-	public void deleteObserver(Observer o) {
-		
-	}
 	
 	public static void main(String[] args) throws Exception {
-/*		Drink drinkOne = new Drink("Pepsi", 0.99, 368);
-		Drink drinkTwo = new Drink("Fanta", 0.99, 289);
-		Drink[] drinks ={drinkOne, drinkTwo};*/
-		Stock stock = new Stock(); 
-		
-		stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", 1, 521);
-		stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\");
-		System.out.println(stock.getDrinks());
-		
-//		stock.testTransformListToStrings();
 	}
 
 }
