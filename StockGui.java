@@ -1,8 +1,6 @@
 package stockmanagementsystem;
 
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.LocalDate;
@@ -16,19 +14,25 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SpringLayout;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 public class StockGui {
 
-	JFrame frame;
-	JTable drinksTable;
-	JLabel totalStockLabel;
+	static JFrame frame;
+	static JTable drinksTable;
+	static JLabel totalStockLabel;
 	/**
 	 * Launch the application.
+	 * @throws InterruptedException 
 	 */
 	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+		    public void run() {
+		    	CheckDoneFile checkDoneFile = new CheckDoneFile();
+		    	checkDoneFile.start(); 
+		    }
+		});
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -38,14 +42,7 @@ public class StockGui {
 					e.printStackTrace();
 				}
 			}
-		});
-		CheckDoneFile checkDoneFile = new CheckDoneFile();
-		checkDoneFile.start();
-		try {
-			checkDoneFile.join();
-		} catch (InterruptedException e) {
-			
-		}
+		});	
 	}
 
 	/**
@@ -65,21 +62,11 @@ public class StockGui {
 		frame.setBounds(100, 100, 946, 620);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		//Defining table
+		//defining table
 		JLabel labelTable = new JLabel("Aktueller Bestand");
-		String[] columnHeaders = {"Id", "Name", "Preis", "Menge", "Neuer Bestand"};
-		DefaultTableModel model = new DefaultTableModel(columnHeaders, 0);
+		drinksTable = new JTable(StockGuiServices.tableModel);		
 		
-		
-		//Adding drinks to table
-		Stock stock = new Stock();
-		for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
-			String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), " "};
-			model.addRow(drinkForTable);
-		}
-		drinksTable = new JTable(model);		
-		
-		JLabel labelSum = new JLabel("Gesamtsumme:");
+		JLabel labelSum = new JLabel("Gesamtbestand:");
 		
 		SpringLayout springLayout = new SpringLayout();
 		springLayout.putConstraint(SpringLayout.NORTH, drinksTable, 0, SpringLayout.NORTH, frame.getContentPane());
@@ -97,14 +84,13 @@ public class StockGui {
 		
 		JButton btnCloseApp = new JButton("Anwendung schließen");
 		springLayout.putConstraint(SpringLayout.SOUTH, btnCloseApp, -10, SpringLayout.SOUTH, frame.getContentPane());
-		btnCloseApp.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		btnCloseApp.addActionListener(e -> {
 				int option = JOptionPane.showConfirmDialog(frame, "Anwendung schließen?", "Anwendung schließen?", JOptionPane.OK_CANCEL_OPTION);
 				if(option == JOptionPane.OK_OPTION) {
 					frame.dispose();
 				}
 			}
-		});
+		);
 		springLayout.putConstraint(SpringLayout.EAST, btnCloseApp, -10, SpringLayout.EAST, frame.getContentPane());
 		frame.getContentPane().add(btnCloseApp);
 		
@@ -113,21 +99,11 @@ public class StockGui {
 		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 560, SpringLayout.EAST, tableContainer);
 		springLayout.putConstraint(SpringLayout.EAST, btnAddDrink, 760, SpringLayout.EAST, tableContainer);
 		btnAddDrink.setHorizontalAlignment(SwingConstants.RIGHT);
-		btnAddDrink.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AddNewDrinkDialog addDrinkDialog = new AddNewDrinkDialog();
-				addDrinkDialog.setVisible(true);
-				model.setRowCount(0);
-				try {
-					for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
-						String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), " "};
-						model.addRow(drinkForTable);
-					}
-				} catch (Exception e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				drinksTable.repaint();
+		btnAddDrink.addActionListener(e -> {
+			try {
+				StockGuiServices.addNewDrink();
+			} catch (Exception e2) {
+				e2.printStackTrace();
 			}
 		});
 		frame.getContentPane().add(btnAddDrink);
@@ -151,72 +127,39 @@ public class StockGui {
 		totalStockLabel = new JLabel();
 		springLayout.putConstraint(SpringLayout.NORTH, totalStockLabel, 0, SpringLayout.NORTH, labelSum);
 		springLayout.putConstraint(SpringLayout.WEST, totalStockLabel, 6, SpringLayout.EAST, labelSum);
-		frame.getContentPane().add(totalStockLabel);
-		totalStockLabel.setText(String.valueOf(stock.getTotalStock("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")));
 		
-		//change stock of corresponding drink on enter
+		JButton btnRefresh = new JButton("Aktualisieren");
+		btnRefresh.addActionListener(e -> {
+			StockGuiServices.updateTable();
+			}
+		);
+		springLayout.putConstraint(SpringLayout.NORTH, btnRefresh, 10, SpringLayout.NORTH, tableContainer);
+		springLayout.putConstraint(SpringLayout.WEST, btnRefresh, 10, SpringLayout.WEST, tableContainer);
+		frame.getContentPane().add(btnRefresh);
+		frame.getContentPane().add(totalStockLabel);
+		totalStockLabel.setText(String.valueOf(Stock.getTotalStock(Constants.fileDrinksList)));
+		
+		//changing stock of corresponding drink on enter
 		drinksTable.addKeyListener (new KeyListener() {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyChar() == KeyEvent.VK_ENTER) {
-				//get value of new entry in stock column and corresponding id
-				int idOfChangedDrink = drinksTable.getSelectedRow();
-				TableCellEditor cellEditor = drinksTable.getCellEditor(idOfChangedDrink,3);	
-				cellEditor.stopCellEditing();
-				Object cellValue = cellEditor.getCellEditorValue();
-			    String textFieldString = (String) cellValue;
-			    //remove whitespace
-			    textFieldString = textFieldString.replaceAll("\\s", "");
-			        
-				if(!textFieldString.equals("")) {
-					int newStockValue = Integer.parseInt(textFieldString);
-					if(newStockValue >= 0) {
-						//uses setNewStockInFile from Stock.java
-						try {
-							stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", idOfChangedDrink, newStockValue);
-							
-							model.setRowCount(0);
-							for(Drink drink : stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")) {
-								String[] drinkForTable = new String[]{String.valueOf(drink.getId()), drink.getName(), String.valueOf(drink.getPrice()), String.valueOf(drink.getStock()), " "};
-								model.addRow(drinkForTable);
-								totalStockLabel.setText(String.valueOf(stock.getTotalStock("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\")));
-							}
-							drinksTable.repaint();
-							
-						} catch (Exception e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-							}
-
+					try {
+						StockGuiServices.addNewStockToDrink();
+					} catch (Exception e1) {
+						e1.printStackTrace();
 					}
-					else {
-						//opens dialog with message
-						JOptionPane.showMessageDialog(frame,
-							    "Neue Menge kann nicht negativ sein",
-							    "Warnung",
-							    JOptionPane.WARNING_MESSAGE);
-					}
-				}
-
-				else {
-					JOptionPane.showMessageDialog(frame,
-						    "Neue Menge kann nicht leer sein",
-						    "Warnung",
-						    JOptionPane.WARNING_MESSAGE);
 				}
 			}
-		}
 
 			@Override
 			public void keyTyped(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
+				//not used
 			}
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				// TODO Auto-generated method stub
-				
+				//not used
 			}});
 	}
 }

@@ -7,16 +7,15 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.JTextField;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class AddNewDrinkDialog extends JDialog {
@@ -47,10 +46,8 @@ public class AddNewDrinkDialog extends JDialog {
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
-		{
-			priceTextField = new JTextField();
-			priceTextField.setColumns(10);
-		}
+		priceTextField = new JTextField();
+		priceTextField.setColumns(10);
 		nameTextField = new JTextField();
 		nameTextField.setColumns(10);
 		stockTextField = new JTextField();
@@ -100,55 +97,15 @@ public class AddNewDrinkDialog extends JDialog {
 					.addContainerGap(66, Short.MAX_VALUE))
 		);
 		contentPanel.setLayout(gl_contentPanel);
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			
-			JButton addDrinkButton = new JButton("Getränk hinzufügen");
-			addDrinkButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					int idNewDrink = 0;
-					String nameNewDrink = nameTextField.getText();
-					double priceNewDrink = Double.parseDouble(priceTextField.getText());
-					int stockNewDrink = Integer.parseInt(stockTextField.getText());
-					Drink newDrink = new Drink(idNewDrink, nameNewDrink, priceNewDrink, stockNewDrink);
-					Stock stock = new Stock();
-					try {
-						ArrayList<Drink> currentDrinks = stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\");
-						boolean isInFile = false;
-						for(Drink drink : currentDrinks) {
-						if(drink.getName().equals(newDrink.getName())) {
-							isInFile = true;
-							JOptionPane.showMessageDialog(getParent(), "Dieses Getränk gibt es schon im Bestand", "Warnung", JOptionPane.WARNING_MESSAGE);
-							break;
-						}
-						}
-						if(!isInFile) {
-							try {
-								newDrink.setId(currentDrinks.size());
-								stock.bookInDrink("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", newDrink);
-								JOptionPane.showMessageDialog(getParent(), "Neues Getränk eingetragen", "Bestätigung", JOptionPane.INFORMATION_MESSAGE);
-								nameTextField.setText("");
-								priceTextField.setText("");
-								stockTextField.setText("");
-							} catch (IOException e1) {
-								e1.printStackTrace();
-						}
-						}
-
-					} catch (Exception e2) {
-						// TODO Auto-generated catch block
-						e2.printStackTrace();
-					}
-				}
-			});
+		JPanel buttonPane = new JPanel();
+		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		getContentPane().add(buttonPane, BorderLayout.SOUTH);
+		
+		JButton addDrinkButton = new JButton("Getränk hinzufügen");
+		addDrinkButton.addActionListener(e -> StockGuiServices.addNewDrinkToList(nameTextField, priceTextField, stockTextField, getParent()));
 			buttonPane.add(addDrinkButton);
-			{
-				JButton cancelButton = new JButton("Abbrechen");
-				cancelButton.setActionCommand("Cancel");
-				buttonPane.add(cancelButton);
-			}
-		}
+			JButton cancelButton = new JButton("Abbrechen");
+			cancelButton.addActionListener(e ->	AddNewDrinkDialog.this.dispose());
+			buttonPane.add(cancelButton);
 	}
 }

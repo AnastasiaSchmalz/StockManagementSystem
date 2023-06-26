@@ -6,13 +6,14 @@ import java.util.Scanner;
 
 public class CheckDoneFile extends Thread{
 	
-	File file = new File ("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\Done.CSV");
+	File file = new File (Constants.fileDone);
 	Scanner scanner;
 	String[] nameAndChangeInStockArray;
 	ArrayList<DrinkFromDoneFile> drinksDone = new ArrayList<>();
 
 	@Override
 	public void run() {
+		while(true) {
 		try {
 			scanner = new Scanner(file);
 			while(scanner.hasNext()) {
@@ -34,8 +35,7 @@ public class CheckDoneFile extends Thread{
 				DrinkFromDoneFile drinkToAdd = new DrinkFromDoneFile(name, changeInStock);
 				drinksDone.add(drinkToAdd);
 				}
-			Stock stock = new Stock();
-			ArrayList<Drink> drinks = stock.readStockData("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\");	
+			ArrayList<Drink> drinks = Stock.readStockData(Constants.fileDrinksList);	
 			
 			for(int j=0; j< drinksDone.size(); j++) {
 					for(int k=0; k< drinks.size(); k++) {
@@ -46,18 +46,18 @@ public class CheckDoneFile extends Thread{
 							}
 							int drinkId = drinks.get(k).getId();
 							drinks.get(k).setStock(newStock);
-							stock.setNewStockInFile("C:\\Users\\Anastasia\\OneDrive\\Dokumente\\GetränkeTest1.CSV\\", drinkId, newStock);
+							Stock.setNewStockInFile(Constants.fileDrinksList, drinkId, newStock);
+							break;
 						}
 					}
 				}
-			try {
-					file.delete();
-				} catch (SecurityException e) {
-					
-				}
-			//Thread.sleep(60000);
+			scanner.close();
+			Thread.sleep(60000);
 		} catch (Exception e) {
-			
+			Thread.currentThread().interrupt();
+		} finally {
+			file.delete();
+		}
 		}
 	}
 	public static void main(String[] args) {
