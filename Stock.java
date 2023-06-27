@@ -10,6 +10,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JOptionPane;
+
 public class Stock{
 	
 	static ArrayList<Drink> drinks;
@@ -87,6 +89,7 @@ public class Stock{
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "Datei existiert nicht oder kann nicht geöffnet werden", "Warnung", JOptionPane.WARNING_MESSAGE);
 		}
 		drinks = drinksList;
 		return drinksList;

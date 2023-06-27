@@ -64,7 +64,7 @@ public class StockGui {
 		
 		//defining table
 		JLabel labelTable = new JLabel("Aktueller Bestand");
-		drinksTable = new JTable(StockGuiServices.tableModel);		
+		drinksTable = new JTable(AppServices.tableModel);		
 		
 		JLabel labelSum = new JLabel("Gesamtbestand:");
 		
@@ -99,7 +99,7 @@ public class StockGui {
 		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 560, SpringLayout.EAST, tableContainer);
 		springLayout.putConstraint(SpringLayout.EAST, btnAddDrink, 760, SpringLayout.EAST, tableContainer);
 		btnAddDrink.setHorizontalAlignment(SwingConstants.RIGHT);
-		btnAddDrink.addActionListener(e -> StockGuiServices.addNewDrink());
+		btnAddDrink.addActionListener(e -> AppServices.addNewDrink());
 		frame.getContentPane().add(btnAddDrink);
 		
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
@@ -123,7 +123,7 @@ public class StockGui {
 		springLayout.putConstraint(SpringLayout.WEST, totalStockLabel, 6, SpringLayout.EAST, labelSum);
 		
 		JButton btnRefresh = new JButton("Aktualisieren"); //updates table to show changes which were made in the background
-		btnRefresh.addActionListener(e -> StockGuiServices.updateTable());
+		btnRefresh.addActionListener(e -> AppServices.updateTable());
 		springLayout.putConstraint(SpringLayout.NORTH, btnRefresh, 10, SpringLayout.NORTH, tableContainer);
 		springLayout.putConstraint(SpringLayout.WEST, btnRefresh, 10, SpringLayout.WEST, tableContainer);
 		frame.getContentPane().add(btnRefresh);
@@ -135,7 +135,7 @@ public class StockGui {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyChar() == KeyEvent.VK_ENTER) {
-					StockGuiServices.addNewStockToDrink();
+					AppServices.addNewStockToDrink();
 				}
 			}
 

@@ -1,7 +1,6 @@
 package stockmanagementsystem;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -9,7 +8,7 @@ public class CheckDoneFile extends Thread{
 	
 	File file = new File (Constants.fileDone);
 	String[] nameAndChangeInStockArray;
-	ArrayList<DrinkFromDoneFile> drinksDone = new ArrayList<>();
+	ArrayList<DrinkDoneFile> drinksDone = new ArrayList<>();
 
 	@Override
 	public void run() {
@@ -30,11 +29,11 @@ public class CheckDoneFile extends Thread{
 						changeInStock = Integer.parseInt(nameAndChangeInStockArray[i]);
 					}
 				}
-				DrinkFromDoneFile drinkToAdd = new DrinkFromDoneFile(name, changeInStock);
+				DrinkDoneFile drinkToAdd = new DrinkDoneFile(name, changeInStock);
 				drinksDone.add(drinkToAdd);
 				}
 			ArrayList<Drink> drinks = Stock.readStockData(Constants.fileDrinksList);
-			StockGuiServices.changeStockFromDone(drinksDone, drinks);	//method to change stock of a drink based on data in Done.csv; throws exception if value of new stock will be negative
+			AppServices.changeStockFromDone(drinksDone, drinks);	//method to change stock of a drink based on data in Done.csv; throws exception if value of new stock will be negative
 			scanner.close(); //closes scanner manually, so file can be deleted afterwards
 			file.delete();
 			Thread.sleep(60000); //sleeps for 1 minute
@@ -45,9 +44,5 @@ public class CheckDoneFile extends Thread{
 				}
 			}
 		}
-	}
-	public static void main(String[] args) {
-		CheckDoneFile test = new CheckDoneFile();
-		test.start();
 	}
 }

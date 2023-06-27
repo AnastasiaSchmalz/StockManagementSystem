@@ -96,7 +96,7 @@ public class AddNewDrinkDialog extends JDialog {
 		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 		
 		JButton addDrinkButton = new JButton("Getränk hinzufügen");
-		addDrinkButton.addActionListener(e -> StockGuiServices.addNewDrinkToList(nameTextField, priceTextField, stockTextField, getParent()));
+		addDrinkButton.addActionListener(e -> AppServices.addNewDrinkToList(nameTextField, priceTextField, stockTextField, getParent()));
 			buttonPane.add(addDrinkButton);
 			JButton cancelButton = new JButton("Abbrechen");
 			cancelButton.addActionListener(e ->	AddNewDrinkDialog.this.dispose());
