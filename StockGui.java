@@ -29,15 +29,15 @@ public class StockGui {
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 		    public void run() {
-		    	CheckDoneFile checkDoneFile = new CheckDoneFile();
-		    	checkDoneFile.start(); 
+		    	CheckDoneFile checkDoneFile = new CheckDoneFile(); //thread for checking Done.csv and making changes to the stock
+		    	checkDoneFile.start();
 		    }
 		});
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
 					StockGui window = new StockGui();
-					window.frame.setVisible(true);
+					StockGui.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -49,7 +49,7 @@ public class StockGui {
 	 * Create the application.
 	 * @throws Exception 
 	 */
-	public StockGui() throws Exception {
+	public StockGui() {
 		initialize();
 	}
 
@@ -57,7 +57,7 @@ public class StockGui {
 	 * Initialize the contents of the frame.
 	 * @throws Exception 
 	 */
-	private void initialize() throws Exception {
+	private void initialize() {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 946, 620);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -99,13 +99,7 @@ public class StockGui {
 		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 560, SpringLayout.EAST, tableContainer);
 		springLayout.putConstraint(SpringLayout.EAST, btnAddDrink, 760, SpringLayout.EAST, tableContainer);
 		btnAddDrink.setHorizontalAlignment(SwingConstants.RIGHT);
-		btnAddDrink.addActionListener(e -> {
-			try {
-				StockGuiServices.addNewDrink();
-			} catch (Exception e2) {
-				e2.printStackTrace();
-			}
-		});
+		btnAddDrink.addActionListener(e -> StockGuiServices.addNewDrink());
 		frame.getContentPane().add(btnAddDrink);
 		
 		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
@@ -128,11 +122,8 @@ public class StockGui {
 		springLayout.putConstraint(SpringLayout.NORTH, totalStockLabel, 0, SpringLayout.NORTH, labelSum);
 		springLayout.putConstraint(SpringLayout.WEST, totalStockLabel, 6, SpringLayout.EAST, labelSum);
 		
-		JButton btnRefresh = new JButton("Aktualisieren");
-		btnRefresh.addActionListener(e -> {
-			StockGuiServices.updateTable();
-			}
-		);
+		JButton btnRefresh = new JButton("Aktualisieren"); //updates table to show changes which were made in the background
+		btnRefresh.addActionListener(e -> StockGuiServices.updateTable());
 		springLayout.putConstraint(SpringLayout.NORTH, btnRefresh, 10, SpringLayout.NORTH, tableContainer);
 		springLayout.putConstraint(SpringLayout.WEST, btnRefresh, 10, SpringLayout.WEST, tableContainer);
 		frame.getContentPane().add(btnRefresh);
@@ -144,11 +135,7 @@ public class StockGui {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyChar() == KeyEvent.VK_ENTER) {
-					try {
-						StockGuiServices.addNewStockToDrink();
-					} catch (Exception e1) {
-						e1.printStackTrace();
-					}
+					StockGuiServices.addNewStockToDrink();
 				}
 			}
 

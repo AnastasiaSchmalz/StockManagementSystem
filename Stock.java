@@ -16,42 +16,43 @@ public class Stock{
 	static int totalStock;
 	static double totalPrice;
 	
-	private Stock() throws Exception {
-		throw new Exception();
+	//private constructor, so class can not be instantiated elsewhere
+	private Stock() {
+		throw new IllegalStateException("Utility class");
 	}
 	
 	public static ArrayList<Drink> getDrinks() {
 		return drinks;
 	}
 	
-	public static int getTotalStock(String file) throws Exception {
+	public static int getTotalStock(String file) {
 		List<Drink> drinksList = Stock.readStockData(file);
 		totalStock = drinksList.stream()
-				.mapToInt(drink -> drink.getStock())
+				.mapToInt(Drink::getStock)
 				.sum();
 		return totalStock;
 	}
 	
 	//standard-methods for comparing and sorting arraylist of drinks
-	public static void compareStockData(ArrayList<Drink> listOfDrinks) {
+	public static void compareStockData(ArrayList<Drink> listOfDrinks) { //new list for sorted drinks
 		class DrinkComparator implements Comparator<Drink> {
 			@Override
 			public int compare(Drink drinkOne, Drink drinkTwo) {
-				int compareValue = Integer.compare(drinkOne.getStock(), drinkTwo.getStock());
+				int compareValue = Integer.compare(drinkOne.getStock(), drinkTwo.getStock()); //first compares stock of botch drink
 				if(compareValue == 0) {
-					compareValue = drinkOne.getName().compareTo(drinkTwo.getName());
+					compareValue = drinkOne.getName().compareTo(drinkTwo.getName()); //if stock is the same, it compares the names of both drinks
 				}
 				return compareValue;
 			}
 		}
 		Collections.sort(listOfDrinks, new DrinkComparator());
 		for(Drink drink : listOfDrinks) {
-			drink.setId(listOfDrinks.indexOf(drink));
+			drink.setId(listOfDrinks.indexOf(drink)); //changing id to reflect each drink's new spot in sorted table
 		}
 	}
 
 	
-	public static ArrayList<Drink> readStockData(String file) throws Exception {
+	public static ArrayList<Drink> readStockData(String file){
 		ArrayList<Drink> drinksList = new ArrayList<>();
 		int idAttribute = 0;
 		String nameAttribute = null;
@@ -59,9 +60,7 @@ public class Stock{
 		int stockAttribute = 0;
 		
 		File fileToRead = new File(file);
-		Scanner scanner;
-		try {
-			scanner = new Scanner(fileToRead);
+		try (Scanner scanner = new Scanner(fileToRead)) { //try-with-ressources: closes scanner automatically after execution
 			while(scanner.hasNext()) { //iterates through data in file
 				String drinkToBeSeparated = scanner.nextLine(); //makes for each line in csv-file its own string
 				String[] drinkAttributeArray = drinkToBeSeparated.split(";"); //seperates String into id, name, price and stock
@@ -79,9 +78,6 @@ public class Stock{
 					else if(i == 3) {
 						stockAttribute = Integer.parseInt(drinkAttributeArray[i]);
 					}
-					else {
-						throw new Exception("Exception while converting data into attributes for drinks");
-					}
 				}
 				drinkToAdd = new Drink(idAttribute, nameAttribute, priceAttribute, stockAttribute);
 				drinksList.add(drinkToAdd);
@@ -89,7 +85,6 @@ public class Stock{
 				//comparing and sorting by stock and by name
 				Stock.compareStockData(drinksList);
 			}
-		scanner.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -97,7 +92,7 @@ public class Stock{
 		return drinksList;
 	}
 	
-	public static void setNewStockInFile(String file, int index, int newStock) throws Exception {
+	public static void setNewStockInFile(String file, int index, int newStock)  {
 		//reads file and converts into arraylist
 		Stock.readStockData(file);
 		//looks for drink with corresponding index to change its stock
@@ -108,35 +103,40 @@ public class Stock{
 		}
 		//transforming arraylist into csv-file
 		File fileAfterTransformation = new File(file);
-		FileWriter filewriter = new FileWriter(fileAfterTransformation, false);
-		//building one string with comma-seperated values for id, name, price and stock and writes each string into a new line in the file
-		for(Drink drink: drinks) {
-			String idString = String.valueOf(drink.getId()).concat(";");
-			String nameString = drink.getName().concat(";");
-			String priceString = String.valueOf(drink.getPrice()).concat(";");
-			String stockString = String.valueOf(drink.getStock());
-			String drinkString = idString+nameString+priceString+stockString;
-			filewriter.write(drinkString);
-			filewriter.write("\n");
+		try (FileWriter filewriter = new FileWriter(fileAfterTransformation, false)) { //try-with-ressources: closes filewriter automatically after execution
+			//building one string with comma-seperated values for id, name, price and stock and writes each string into a new line in the file
+			for(Drink drink: drinks) {
+				//building one string per drink with its id, name, price and stock
+				String idString = String.valueOf(drink.getId()).concat(";");
+				String nameString = drink.getName().concat(";");
+				String priceString = String.valueOf(drink.getPrice()).concat(";");
+				String stockString = String.valueOf(drink.getStock());
+				String drinkString = idString+nameString+priceString+stockString;
+				filewriter.write(drinkString);
+				filewriter.write("\n"); //makes sure every drink is written into its own line in file
+			}
+		} catch (IOException e) { //exception if named file is not a file at all, can not be created or opened
+			e.printStackTrace();
 		}
-		filewriter.close();
 	}
 
 	
-	protected static void bookInDrink(String file, Drink newDrink) throws IOException {
+	protected static void bookInDrink(String file, Drink newDrink) {
+		//transforming arraylist into csv-file
 		File fileWithNewDrink = new File(file);
-		FileWriter filewriter = new FileWriter(fileWithNewDrink, true);
-		
-		//building a string with comma-seperated values for id, name, price and stock and writes it into a new line in the file
-		String idString = String.valueOf(newDrink.getId()).concat(";");
-		String nameString = newDrink.getName().concat(";");
-		String priceString = String.valueOf(newDrink.getPrice()).concat(";");
-		String stockString = String.valueOf(newDrink.getStock());
-		String drinkString = idString+nameString+priceString+stockString;
-		
-		filewriter.write(drinkString);
-		filewriter.write("\n");
-		filewriter.close();
+		try (FileWriter filewriter = new FileWriter(fileWithNewDrink, true)) { //try-with-ressources: closes scanner automatically after execution
+			//building a string with comma-seperated values for id, name, price and stock and writes it into a new line in the file
+			String idString = String.valueOf(newDrink.getId()).concat(";");
+			String nameString = newDrink.getName().concat(";");
+			String priceString = String.valueOf(newDrink.getPrice()).concat(";");
+			String stockString = String.valueOf(newDrink.getStock());
+			String drinkString = idString+nameString+priceString+stockString;
+			
+			filewriter.write(drinkString);
+			filewriter.write("\n");
+		} catch (IOException e) { //exception if named file is not a file at all, can not be created or opened
+			e.printStackTrace();
+		}
 	}
 
 }

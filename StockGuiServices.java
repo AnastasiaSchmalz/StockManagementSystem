@@ -1,10 +1,8 @@
 package stockmanagementsystem;
 
 import java.awt.Container;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
@@ -12,8 +10,8 @@ import javax.swing.table.TableCellEditor;
 
 public class StockGuiServices {
 	
-	private StockGuiServices() throws Exception {
-		throw new Exception();
+	private StockGuiServices() {
+		throw new IllegalStateException("Utility class");
 	}
 	
 	static DefaultTableModel tableModel = StockGuiServices.defineTableModelWithDrinks();
@@ -35,14 +33,14 @@ public class StockGuiServices {
 		return model;
 	}
 	
-	static void addNewDrink() throws Exception {
+	static void addNewDrink() {
 		//Instantiating dialog for adding a new drink
 		AddNewDrinkDialog addDrinkDialog = new AddNewDrinkDialog();
 		addDrinkDialog.setVisible(true);
 		StockGuiServices.updateTable();
 	}
 	
-	static void addNewStockToDrink () throws Exception {
+	static void addNewStockToDrink () {
 		//Instantianting new gui
 		//Get value of new entry in stock column and corresponding id
 		int idOfChangedDrink = StockGui.drinksTable.getSelectedRow();
@@ -56,16 +54,9 @@ public class StockGuiServices {
 		if(!textFieldString.equals("")) {
 			int newStockValue = Integer.parseInt(textFieldString);
 			if(newStockValue >= 0) {
-				//Uses setNewStockInFile from Stock.java
-				try {
-					Stock.setNewStockInFile(Constants.fileDrinksList, idOfChangedDrink, newStockValue);
-					//Updates table in gui
-					StockGuiServices.updateTable();
-					
-				} catch (Exception e1) {
-					e1.printStackTrace();
-					}
-
+				Stock.setNewStockInFile(Constants.fileDrinksList, idOfChangedDrink, newStockValue);
+				//Updates table in gui
+				StockGuiServices.updateTable();
 			}
 			else {
 				JOptionPane.showMessageDialog(StockGui.frame,
@@ -82,7 +73,7 @@ public class StockGuiServices {
 				    JOptionPane.WARNING_MESSAGE);
 		}
 	}
-	
+	//updating table to show changes which were made in the background, especially after reading Done.csv
 	public static void updateTable() {
 		StockGuiServices.tableModel.setRowCount(0);
 		try {
@@ -114,20 +105,32 @@ public class StockGuiServices {
 			}
 			}
 			if(!isInFile) {
-				try {
-					newDrink.setId(currentDrinks.size());
-					Stock.bookInDrink(Constants.fileDrinksList, newDrink);
-					JOptionPane.showMessageDialog(parentComponent, "Neues Getränk eingetragen", "Bestätigung", JOptionPane.INFORMATION_MESSAGE);
-					name.setText("");
-					price.setText("");
-					price.setText("");
-				} catch (IOException e1) {
-					e1.printStackTrace();
-			}
+				newDrink.setId(currentDrinks.size());
+				Stock.bookInDrink(Constants.fileDrinksList, newDrink);
+				JOptionPane.showMessageDialog(parentComponent, "Neues Getränk eingetragen", "Bestätigung", JOptionPane.INFORMATION_MESSAGE);
+				name.setText("");
+				price.setText("");
+				stock.setText("");
 			}
 
 		} catch (Exception e2) {
 			e2.printStackTrace();
+		}
+	}
+	
+	public static void changeStockFromDone(ArrayList<DrinkFromDoneFile> drinksDone, ArrayList<Drink> drinks) throws Exception {
+		for(int j=0; j< drinksDone.size(); j++) {
+			for(int k=0; k< drinks.size(); k++) {
+				if(drinksDone.get(j).getName().equals(drinks.get(k).getName())) { //checking if drink exists in table
+					int newStock = drinks.get(k).getStock()-drinksDone.get(j).getChangeInStock(); //changing stock
+					if(newStock < 0) { //new stock can not be negative
+						throw new Exception ("Neuer Bestand kann nicht negativ sein");
+					}
+					int drinkId = drinks.get(k).getId(); //getting id of drink which stock changes
+					Stock.setNewStockInFile(Constants.fileDrinksList, drinkId, newStock); //setting new stock for drink in file
+					break;
+				}
+			}
 		}
 	}
 }
