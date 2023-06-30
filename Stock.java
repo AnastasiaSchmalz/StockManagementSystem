@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 
 public class Stock{
 	
-	static ArrayList<Drink> drinks;
+	public static ArrayList<Drink> drinks;
 	static int totalStock;
 	static double totalPrice;
 	
@@ -29,14 +29,14 @@ public class Stock{
 	
 	public static int getTotalStock(String file) {
 		List<Drink> drinksList = Stock.readStockData(file);
-		totalStock = drinksList.stream()
-				.mapToInt(Drink::getStock)
-				.sum();
+		totalStock = drinksList.stream() //returns a stream of the list with drinks
+				.mapToInt(Drink::getStock) //returns a new stream for only the stock of each drink
+				.sum();	//returns the sum of stock of each drink
 		return totalStock;
 	}
 	
 	//standard-methods for comparing and sorting arraylist of drinks
-	public static void compareStockData(ArrayList<Drink> listOfDrinks) { //new list for sorted drinks
+	public static ArrayList<Drink> compareStockData(ArrayList<Drink> listOfDrinks) { //new list for sorted drinks
 		class DrinkComparator implements Comparator<Drink> {
 			@Override
 			public int compare(Drink drinkOne, Drink drinkTwo) {
@@ -51,6 +51,7 @@ public class Stock{
 		for(Drink drink : listOfDrinks) {
 			drink.setId(listOfDrinks.indexOf(drink)); //changing id to reflect each drink's new spot in sorted table
 		}
+		return listOfDrinks;
 	}
 
 	
