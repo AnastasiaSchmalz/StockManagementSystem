@@ -41,7 +41,8 @@ class StockTest {
 		
 		//transforming arraylist into csv-file
 		File testFile = new File(Constants.testFile);
-		try (FileWriter filewriter = new FileWriter(testFile, false)) { //try-with-ressources: closes filewriter automatically after execution
+		//try-with-resources: closes filewriter automatically after execution
+		try (FileWriter filewriter = new FileWriter(testFile, false)) { 
 			//building one string with comma-seperated values for id, name, price and stock and writes each string into a new line in the file
 			for(Drink drink: testDrinks) {
 				//building one string per drink with its id, name, price and stock
@@ -51,9 +52,11 @@ class StockTest {
 				String stockString = String.valueOf(drink.getStock());
 				String drinkString = idString+nameString+priceString+stockString;
 				filewriter.write(drinkString);
-				filewriter.write("\n"); //makes sure every drink is written into its own line in file
+				//writing every drink into its own line in file
+				filewriter.write("\n"); 
 			}
-		} catch (IOException e) { //exception if named file is not a file at all, can not be created or opened
+		//exception if named file is not a file at all, can not be created or opened
+		} catch (IOException e) { 
 			e.printStackTrace();
 		}
 		

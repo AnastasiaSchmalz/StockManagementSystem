@@ -16,12 +16,17 @@ public class CheckDoneFile extends Thread{
 			try {
 				Scanner scanner = new Scanner(file);
 				while(scanner.hasNext()) {
-				String nameAndChangeInStock = scanner.nextLine(); //building string for each line in Done.csv
-				nameAndChangeInStockArray = nameAndChangeInStock.split(";"); //seperating name from change in stock in string
-				String name =""; //instantiating name
-				int changeInStock = 0; //instantiating change in stock
+				//building string for each line in Done.csv
+				String nameAndChangeInStock = scanner.nextLine(); 
+				//separating name from change in stock in string
+				nameAndChangeInStockArray = nameAndChangeInStock.split(";"); 
+				//initializing name
+				String name =""; 
+				//initializing change in stock
+				int changeInStock = 0; 
 				
-				for(int i=0; i<2; i++) { //loop to convert name and change in stock into corresponding data types
+				//loop for converting name and change in stock into corresponding data types
+				for(int i=0; i<2; i++) { 
 					if(i == 0) {
 						name = nameAndChangeInStockArray[i];
 					}
@@ -33,14 +38,20 @@ public class CheckDoneFile extends Thread{
 				drinksDone.add(drinkToAdd);
 				}
 				ArrayList<Drink> drinks = Stock.readStockData(Constants.fileDrinksList);
-				AppServices.changeStockFromDone(drinksDone, drinks);	//method to change stock of a drink based on data in Done.csv; throws exception if value of new stock will be negative
-				scanner.close(); //closes scanner manually, so file can be deleted afterwards
-				file.delete(); //deletes file after executing previous methods
-				Thread.sleep(60000); //sleeps for 1 minute
+				
+				//using method to change stock of a drink based on data in Done.csv; throws exception if value of new stock will be negative
+				AppServices.changeStockFromDone(drinksDone, drinks);
+				//closing scanner manually, so file can be deleted afterwards	
+				scanner.close(); 
+				//deleting file after executing previous methods
+				file.delete(); 
+				//sleeping for 1 minute
+				Thread.sleep(60000); 
 			} catch (Exception e) {
 				e.printStackTrace();
 				if(e instanceof InterruptedException) {
-					Thread.currentThread().interrupt(); //sets interrupt status to true
+					//setting interrupt status to true
+					Thread.currentThread().interrupt(); 
 				}
 			}
 		}
