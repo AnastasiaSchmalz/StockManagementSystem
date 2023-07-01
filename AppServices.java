@@ -1,7 +1,6 @@
 package stockmanagementsystem;
 
 import java.awt.Container;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -11,6 +10,15 @@ import javax.swing.table.TableCellEditor;
 
 //this class is used for storing methods which are used in StockGui and its dialogs
 public class AppServices {
+	
+	//custom exception in case stock would be negative after changes
+	private static class NegativeStockException extends Exception {	//static so it can be used without instantiating a new AppServices-object
+		//constructor
+		protected NegativeStockException() {
+			super("New stock can not be negative");	//message when exception is thrown
+		}
+	}
+	
 	
 	//private constructor, so class can not be instantiated elsewhere
 	private AppServices() {
@@ -32,7 +40,7 @@ public class AppServices {
 		return model;
 	}
 	
-	static void addNewDrink() {
+	static void createAddNewDrinkDialog() {
 		//instantiating dialog for adding a new drink
 		AddNewDrinkDialog addDrinkDialog = new AddNewDrinkDialog();
 		addDrinkDialog.setVisible(true);
@@ -69,6 +77,7 @@ public class AppServices {
 				    JOptionPane.WARNING_MESSAGE);
 		}
 	}
+	
 	//updating table to show changes which were made in the background, especially after reading Done.csv
 	public static void updateTable() {
 		AppServices.tableModel.setRowCount(0);
@@ -103,7 +112,7 @@ public class AppServices {
 		if(!isInFile) {
 			newDrink.setId(currentDrinks.size()); //new drink is appended to list, therefore it gets the next available id (will be changed later when drinks are sorted again)
 			Stock.bookInDrink(Constants.fileDrinksList, newDrink);
-			JOptionPane.showMessageDialog(parentComponent, "Neues Getränk eingetragen", "Bestätigung", JOptionPane.INFORMATION_MESSAGE);	//notifys user if new drink was added successfully
+			JOptionPane.showMessageDialog(parentComponent, "Neues Getränk eingetragen. Bitte Tabelle aktualisieren, um neues Getränk zu sehen", "Bestätigung", JOptionPane.INFORMATION_MESSAGE);	//notifys user if new drink was added successfully
 			//clearing textfields in dialog
 			name.setText("");
 			price.setText("");
@@ -112,13 +121,13 @@ public class AppServices {
 	}
 	
 	//checking if Done.csv has any data and if so changes stock of the drinks Done.csv contains
-	public static void changeStockFromDone(ArrayList<DrinkDoneFile> drinksDone, ArrayList<Drink> drinks) throws Exception {
+	public static void changeStockFromDone(ArrayList<DrinkDoneFile> drinksDone, ArrayList<Drink> drinks) throws NegativeStockException {
 		for(int j=0; j< drinksDone.size(); j++) {
 			for(int k=0; k< drinks.size(); k++) {
 				if(drinksDone.get(j).getName().equals(drinks.get(k).getName())) { //checks if drink exists in table
 					int newStock = drinks.get(k).getStock()-drinksDone.get(j).getChangeInStock(); //changes stock
 					if(newStock < 0) {
-						throw new Exception ("Neuer Bestand kann nicht negativ sein");	//new stock can not be negative
+						throw new NegativeStockException();	//new stock can not be negative
 					}
 					int drinkId = drinks.get(k).getId(); //gets id of drink which stock changes
 					Stock.setNewStockInFile(Constants.fileDrinksList, drinkId, newStock); //sets new stock for drink in file

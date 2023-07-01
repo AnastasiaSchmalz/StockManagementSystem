@@ -85,9 +85,9 @@ public class StockGui {
 		JButton btnCloseApp = new JButton("Anwendung schließen");
 		springLayout.putConstraint(SpringLayout.SOUTH, btnCloseApp, -10, SpringLayout.SOUTH, frame.getContentPane());
 		btnCloseApp.addActionListener(e -> {
-				int option = JOptionPane.showConfirmDialog(frame, "Anwendung schließen?", "Anwendung schließen?", JOptionPane.OK_CANCEL_OPTION);
+				int option = JOptionPane.showConfirmDialog(frame, "Anwendung schließen?", "Anwendung schließen?", JOptionPane.OK_CANCEL_OPTION);	//dialog asks for confirmation if close-button was pushed, prevents closing application by accident
 				if(option == JOptionPane.OK_OPTION) {
-					frame.dispose();
+					frame.dispose(); //closes dialog only when ok-button is pushed
 				}
 			}
 		);
@@ -98,12 +98,11 @@ public class StockGui {
 		btnAddDrink.setToolTipText("Neues Getränk hinzufügen");
 		springLayout.putConstraint(SpringLayout.WEST, btnAddDrink, 560, SpringLayout.EAST, tableContainer);
 		springLayout.putConstraint(SpringLayout.EAST, btnAddDrink, 760, SpringLayout.EAST, tableContainer);
-		btnAddDrink.setHorizontalAlignment(SwingConstants.RIGHT);
-		btnAddDrink.addActionListener(e -> AppServices.addNewDrink());
+		btnAddDrink.addActionListener(e -> AppServices.createAddNewDrinkDialog());
 		frame.getContentPane().add(btnAddDrink);
 		
-		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
-		JLabel date = new JLabel(String.valueOf((LocalDate.now()).format(formatter)));
+		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);			//formatter for european date format
+		JLabel date = new JLabel(String.valueOf((LocalDate.now()).format(formatter)));					//shows today's date in european format
 		springLayout.putConstraint(SpringLayout.NORTH, labelTable, 0, SpringLayout.NORTH, date);
 		springLayout.putConstraint(SpringLayout.NORTH, date, 10, SpringLayout.NORTH, frame.getContentPane());
 		springLayout.putConstraint(SpringLayout.EAST, date, -10, SpringLayout.EAST, frame.getContentPane());

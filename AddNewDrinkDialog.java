@@ -12,6 +12,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 
+//dialog opens when btnAddDrink in StockGui.java is pushed
 public class AddNewDrinkDialog extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
@@ -71,6 +72,7 @@ public class AddNewDrinkDialog extends JDialog {
 								.addComponent(nameTextField, GroupLayout.PREFERRED_SIZE, 96, GroupLayout.PREFERRED_SIZE))))
 					.addContainerGap(171, Short.MAX_VALUE))
 		);
+		//textfields to get user input for instantiating a new drink-object later
 		gl_contentPanel.setVerticalGroup(
 			gl_contentPanel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPanel.createSequentialGroup()

@@ -7,14 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Scanner;
 
 import javax.swing.JOptionPane;
 
 public class Stock{
 	
-	public static ArrayList<Drink> drinks;
+	public static ArrayList<Drink> drinks; //contains drinks that were read from file
 	static int totalStock;
 	static double totalPrice;
 	
@@ -28,15 +27,15 @@ public class Stock{
 	}
 	
 	public static int getTotalStock(String file) {
-		List<Drink> drinksList = Stock.readStockData(file);
+		ArrayList<Drink> drinksList = Stock.readStockData(file);
 		totalStock = drinksList.stream() //returns a stream of the list with drinks
 				.mapToInt(Drink::getStock) //returns a new stream for only the stock of each drink
 				.sum();	//returns the sum of stock of each drink
 		return totalStock;
 	}
 	
-	//standard-methods for comparing and sorting arraylist of drinks
-	public static ArrayList<Drink> compareStockData(ArrayList<Drink> listOfDrinks) { //new list for sorted drinks
+	//using standard-methods for comparing and sorting arraylist of drinks
+	public static ArrayList<Drink> compareStockData(ArrayList<Drink> listOfDrinks) { //parameter is list that results from reading the file
 		class DrinkComparator implements Comparator<Drink> {
 			@Override
 			public int compare(Drink drinkOne, Drink drinkTwo) {
@@ -56,7 +55,7 @@ public class Stock{
 
 	
 	public static ArrayList<Drink> readStockData(String file){
-		ArrayList<Drink> drinksList = new ArrayList<>();
+		ArrayList<Drink> drinksList = new ArrayList<>(); //initializes list for storing drinks that were read from file
 		int idAttribute = 0;
 		String nameAttribute = null;
 		double priceAttribute = 0;
@@ -90,7 +89,7 @@ public class Stock{
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "Datei existiert nicht oder kann nicht geöffnet werden", "Warnung", JOptionPane.WARNING_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Datei existiert nicht oder kann nicht geöffnet werden", "Warnung", JOptionPane.WARNING_MESSAGE); //dialog with warning for user
 		}
 		drinks = drinksList;
 		return drinksList;

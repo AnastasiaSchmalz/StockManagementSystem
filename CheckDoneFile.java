@@ -11,7 +11,7 @@ public class CheckDoneFile extends Thread{
 	ArrayList<DrinkDoneFile> drinksDone = new ArrayList<>();
 
 	@Override
-	public void run() {
+	public void run() { //calls Runnable's run()-methode
 		while(true) {
 			try {
 				Scanner scanner = new Scanner(file);
@@ -32,11 +32,11 @@ public class CheckDoneFile extends Thread{
 				DrinkDoneFile drinkToAdd = new DrinkDoneFile(name, changeInStock);
 				drinksDone.add(drinkToAdd);
 				}
-			ArrayList<Drink> drinks = Stock.readStockData(Constants.fileDrinksList);
-			AppServices.changeStockFromDone(drinksDone, drinks);	//method to change stock of a drink based on data in Done.csv; throws exception if value of new stock will be negative
-			scanner.close(); //closes scanner manually, so file can be deleted afterwards
-			file.delete();
-			Thread.sleep(60000); //sleeps for 1 minute
+				ArrayList<Drink> drinks = Stock.readStockData(Constants.fileDrinksList);
+				AppServices.changeStockFromDone(drinksDone, drinks);	//method to change stock of a drink based on data in Done.csv; throws exception if value of new stock will be negative
+				scanner.close(); //closes scanner manually, so file can be deleted afterwards
+				file.delete(); //deletes file after executing previous methods
+				Thread.sleep(60000); //sleeps for 1 minute
 			} catch (Exception e) {
 				e.printStackTrace();
 				if(e instanceof InterruptedException) {

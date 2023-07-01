@@ -1,7 +1,9 @@
 package stockmanagementsystem;
 
-/*objects of this class are drinks which are found in Done.csv;
-their only instance-variables are their name and change in stock*/
+/*
+ * objects of this class are drinks which are found in Done.csv
+ * their only instance-variables are their name and change in stock 
+ */
 public class DrinkDoneFile {
 	
 	String name;
